@@ -50,9 +50,11 @@ def process_camera_input():
                     break
                 # save image 
                 elif key & 0xFF == ord('e'):
-                    output_image = cv.imencode('.jpg', frame)
-                    cv.imwrite('test.jpg', frame)
-                    print(output_image)
+                    retval, output_image = cv.imencode('.jpg', frame)
+                    print(type(output_image))
+                    # cv.imwrite('test.jpg', frame)
+                    # print(output_image)
+                    break
 
                 pipe.stdout.flush()
 
