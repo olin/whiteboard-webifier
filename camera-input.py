@@ -1,6 +1,7 @@
 import cv2 as cv
 import numpy as np
 import subprocess as sp
+from repo_update import update_yaml_link
 
 def nothing(x):
     pass
@@ -21,6 +22,8 @@ def process_camera_input():
         if len(frame) != 0:
                 frame = frame.reshape((640,960,3))          # Notice how height is specified first and then width
                 if frame is not None:
+                    
+
                     mask = np.zeros(frame.shape,np.uint8)
 
                     gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
@@ -35,16 +38,24 @@ def process_camera_input():
                     c = 10
 
                     th3 = cv.adaptiveThreshold(gray,200,cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY,neighbor,c)
-                    im2, contours, hierarchy = cv.findContours(th3, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+                    # im2, contours, hierarchy = cv.findContours(th3, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
                     # Isolate one contour that we care about
-                    print(contours[1].squeeze())
+                    # print(contours[1].squeeze())
 
                     cv.imshow('frame', th3)
 
-                if cv.waitKey(1) & 0xFF == ord('q'):
+                key = cv.waitKey(1)
+                if key & 0xFF == ord('q'):
                     break
+                # save image 
+                elif key & 0xFF == ord('e'):
+                    output_image = cv.imencode('.jpg', frame)
+                    cv.imwrite('test.jpg', frame)
+                    print(output_image)
+
                 pipe.stdout.flush()
 
     cv.destroyAllWindows()
 
+process_camera_input()
