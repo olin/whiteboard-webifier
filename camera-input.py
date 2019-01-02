@@ -118,14 +118,14 @@ def process_camera_input():
                 if key & 0xFF == ord('q'):
                     break
                 # save image 
-                elif key & 0xFF == ord('e'):
+                elif key & 0xFF == ord(' '):
                     retval, output_image = cv.imencode('.jpg', transform)
                     img_out = upload_image(output_image)
                     img_url = img_out.cdn_url
                     update_yaml_link(img_url)
                     # cv.imwrite('test.jpg', frame)
                     # print(output_image)
-                    break
+                    # break
 
                 pipe.stdout.flush()
 
