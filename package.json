@@ -1,5 +1,5 @@
 {
-  "name": "interact",
+  "name": "live-whiteboard",
   "version": "1.0.0",
   "license": "MIT",
   "babel": {
@@ -26,13 +26,15 @@
   },
   "dependencies": {
     "babel-cli": "^6.26.0",
+    "body-parser": "^1.18.3",
     "cors": "^2.8.4",
     "css-loader": "^1.0.0",
     "express": "^4.16.3",
     "nodemon": "^1.18.3",
     "prop-types": "^15.6.2",
     "react-dom": "^16.3.0",
-    "react-p5-wrapper": "^0.0.4",
+    "socket.io": "^2.2.0",
+    "socket.io-client": "^2.2.0",
     "style-loader": "^0.21.0"
   }
 }

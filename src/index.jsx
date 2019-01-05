@@ -1,44 +1,57 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
-import P5Wrapper from 'react-p5-wrapper';
+import io from 'socket.io-client';
 
 /**
  * The main React container for the app. It holds the state and passes it down
  * as props to its child components.
  */
-class App extends React.Component {
+ class Whiteboard extends React.Component {
 
+    componentDidMount() {
+        const can = this.refs.canvas.getContext('2d')
+        can.fillStyle='green';
+        can.fillRect(10,10,150,100);
+        this.setState({_isMounted: true});
+    }
+
+    componentWillUnmount() {
+        this._isMounted = false;
+    }
     constructor(props) {
         super(props);
+        this.client = io('http://localhost:9091');
+        this.client.on('points', this.handleUpdate)
+        this.state = {_isMounted: false}
     };
 
-    drawLines = (p) => {
-        let points = [];
+    handleUpdate = (msg) => {
+        if (this.state._isMounted) {
+            const can = this.refs.canvas.getContext('2d')
+            const points = msg.points;
+            console.log(points);
+            let i=0;
+            can.fillStyle='#fdfdfd';
+            can.fillRect(0,0,640,480);
+            // can.fillStyle='black';
 
-        p.setup = () => {
-            p.createCanvas(600,400, p.WEBGL)
-            p.colorMode(p.HSB);
-        };
-
-        p.myCustomRedrawAccordingToNewPropsHandler = (props) => {
-            if (props.points){
-              points = props.points
+            // can.beginPath();
+            // can.moveTo(points.x[0],points.y[0]);
+            for (i = 0; i < points.x.length; i++) {
+                const fill = 'hsl('.concat(String(i%255), ', 100%, 75%)')
+                can.fillStyle=fill;
+                can.fillRect(points.x[i], points.y[i], 2, 2);
+                // can.lineTo(points.x[i], points.y[i]);
+                // can.stroke();
             }
-          };
-
-        p.draw = () => {
-            let i = 1;
-            // p.line(20,100,20,100);
-            for (i = 1; i < points.length; i++) {
-                p.stroke(i*15, 255, 120)
-                p.line(points[i-1][0], points[i-1][1], points[i][0], points[i][1]);
-            }
-        };
-    };
+        }
+        
+    }
 
     render() {
-        return (<div>Yo!<P5Wrapper sketch={this.drawLines} points={[[100,100],[20,20],[150,50],[20,20],[20,20]]}/></div>);     
+        return (<canvas ref="canvas" width={640} height={480} />);     
     }
 }
 
-ReactDOM.render(<App />, document.getElementById('root'));
+
+ReactDOM.render(<Whiteboard />, document.getElementById('root'));
