@@ -1,13 +1,10 @@
 import cv2 as cv
 import numpy as np
 import subprocess as sp
-from repo_update import update_yaml_link
-from imageupload import UC_PUBLIC_KEY, UC_PRIVATE_KEY, init_uc, upload_image
 import requests
 
 from socketIO_client_nexus import SocketIO, LoggingNamespace
 
-init_uc(UC_PUBLIC_KEY, UC_PRIVATE_KEY)
 cap = cv.VideoCapture(0)
 
 socket = SocketIO('127.0.0.1', 9091, LoggingNamespace)
@@ -141,12 +138,6 @@ def process_camera_input():
 				# save image 
 				elif key & 0xFF == ord(' '):
 					retval, output_image = cv.imencode('.jpg', transform)
-					img_out = upload_image(output_image)
-					img_url = img_out.cdn_url
-					# update_yaml_link(img_url)
-					# cv.imwrite('test.jpg', frame)
-					# print(output_image)
-					# break
 
 				# pipe.stdout.flush()
 

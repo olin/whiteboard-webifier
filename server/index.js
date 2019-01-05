@@ -8,7 +8,6 @@ const bodyParser = require('body-parser');
 
 // Initializing server + websockets
 
-var app = express();
 var server = http.Server(app);
 var socketServer = new socket(server);
 
