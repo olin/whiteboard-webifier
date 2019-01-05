@@ -2,12 +2,14 @@ import cv2 as cv
 import numpy as np
 import subprocess as sp
 import requests
+from base64 import b64encode
+from auth import USERNAME, PASSWORD
 
 from socketIO_client_nexus import SocketIO, LoggingNamespace
 
 cap = cv.VideoCapture(0)
 
-socket = SocketIO('127.0.0.1', 9091, LoggingNamespace)
+socket = SocketIO('127.0.0.1', 9091, headers={'Authorization': 'Basic ' + str(b64encode('{}:{}'.format(USERNAME, PASSWORD).encode('ascii')))[2:]})
 
 def nothing(x):
 	pass

@@ -4,8 +4,13 @@ const app = express();
 const socket = require('./websocket-server');
 const http = require('http');
 const bodyParser = require('body-parser');
+import dotenv from 'dotenv';
+import fs from 'fs';
 
 
+if (fs.existsSync('./.env')) {
+    dotenv.config();
+}
 // Initializing server + websockets
 
 var server = http.Server(app);

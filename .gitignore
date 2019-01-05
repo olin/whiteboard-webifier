@@ -88,6 +88,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+camera/auth.py
 
 # Spyder project settings
 .spyderproject
