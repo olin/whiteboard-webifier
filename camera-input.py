@@ -3,13 +3,17 @@ import numpy as np
 import subprocess as sp
 from repo_update import update_yaml_link
 from imageupload import UC_PUBLIC_KEY, UC_PRIVATE_KEY, init_uc, upload_image
+import requests
+
+from socketIO_client_nexus import SocketIO, LoggingNamespace
 
 init_uc(UC_PUBLIC_KEY, UC_PRIVATE_KEY)
-# cap = cv.VideoCapture(0)
+cap = cv.VideoCapture(0)
 
+socket = SocketIO('127.0.0.1', 9091, LoggingNamespace)
 
 def nothing(x):
-    pass
+	pass
 
 def order_points(pts):
 	# initialzie a list of coordinates that will be ordered
@@ -73,62 +77,79 @@ def four_point_transform(image, pts):
 	return warped
 
 def process_camera_input():
-    pipe = sp.Popen("gphoto2 --capture-movie --stdout | ffmpeg -i pipe:0 -pix_fmt bgr24 -vcodec rawvideo -an -sn -f image2pipe -", stdout = sp.PIPE, bufsize=10**8, shell=True)
+	# pipe = sp.Popen("gphoto2 --capture-movie --stdout | ffmpeg -i pipe:0 -pix_fmt bgr24 -vcodec rawvideo -an -sn -f image2pipe -", stdout = sp.PIPE, bufsize=10**8, shell=True)
 
-    cv.namedWindow('frame')
-    # cv.createTrackbar('thresh', 'frame', 117, 255, nothing)
-    # cv.createTrackbar('neighbor', 'frame', 25, 255, nothing)
-    # cv.createTrackbar('c', 'frame', 10, 255, nothing)
-
-
-    while(True):
-        raw_image = pipe.stdout.read(960*640*3)
-        # ret, frame = cap.read()
-        # transform the byte read into a numpy array
-        frame =  np.fromstring(raw_image, dtype='uint8')
-        if len(frame) != 0:
-                frame = frame.reshape((640,960,3))          # Notice how height is specified first and then width
-                if frame is not None:
-                    
-
-                    mask = np.zeros(frame.shape,np.uint8)
-
-                    gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+	cv.namedWindow('frame')
+	# cv.createTrackbar('thresh', 'frame', 117, 255, nothing)
+	# cv.createTrackbar('neighbor', 'frame', 25, 255, nothing)
+	# cv.createTrackbar('c', 'frame', 10, 255, nothing)
 
 
-                    # thresh = cv.getTrackbarPos('thresh', 'frame')
-                    # neighbor = (cv.getTrackbarPos('neighbor', 'frame')*2)+3
-                    # c = cv.getTrackbarPos('c', 'frame')
+	while(True):
+		# raw_image = pipe.stdout.read(960*640*3)
+		ret, frame = cap.read()
+		# transform the byte read into a numpy array
+		# frame =  np.fromstring(raw_image, dtype='uint8')
+		if len(frame) != 0:
+				# frame = frame.reshape((640,960,3))          # Notice how height is specified first and then width
+				if frame is not None:
+					
 
-                    thresh = 117
-                    neighbor = 25
-                    c = 10
+					mask = np.zeros(frame.shape,np.uint8)
 
-                    th3 = cv.adaptiveThreshold(gray,200,cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY,neighbor,c)
-                    # im2, contours, hierarchy = cv.findContours(th3, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+					gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
 
-                    # cv.drawContours(frame, contours, -1, (0,255,0), 3)
 
-                    points = np.array([(15,106),(926,105),(884,440),(61,443)])
-                    transform = four_point_transform(frame, points)
+					# thresh = cv.getTrackbarPos('thresh', 'frame')
+					# neighbor = (cv.getTrackbarPos('neighbor', 'frame')*2)+3
+					# c = cv.getTrackbarPos('c', 'frame')
 
-                    cv.imshow('frame', transform)
+					thresh = 117
+					neighbor = 25
+					c = 10
 
-                key = cv.waitKey(1)
-                if key & 0xFF == ord('q'):
-                    break
-                # save image 
-                elif key & 0xFF == ord(' '):
-                    retval, output_image = cv.imencode('.jpg', transform)
-                    img_out = upload_image(output_image)
-                    img_url = img_out.cdn_url
-                    update_yaml_link(img_url)
-                    # cv.imwrite('test.jpg', frame)
-                    # print(output_image)
-                    # break
+					th3 = cv.adaptiveThreshold(gray,200,cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY,neighbor,c)
+					im2, contours, hierarchy = cv.findContours(th3, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
-                pipe.stdout.flush()
+					cv.drawContours(frame, contours, -1, (0,255,0), 3)
 
-    cv.destroyAllWindows()
+					points = np.array([(15,106),(926,105),(884,440),(61,443)])
+					transform = four_point_transform(frame, points)
+
+					# cv.imshow('frame', frame)
+					x_vals = []
+					y_vals = []
+					i=0
+					for contour in contours:
+						for point in contour:
+							# if i%10 == 0:
+								# print(type(int(point[0][1])))x
+							y_vals.append(int(point[0][1]))
+							x_vals.append(int(point[0][0]))
+							# i+=1
+
+					socket.emit('point-vals', {'points': {'x': x_vals, 'y': y_vals}})
+					# requests.post('http://localhost:9091/points', json={'points': {'x': x_vals, 'y': y_vals}})
+					# print(x_vals)
+					# all_vals = [point[0] for contour in contours for point in contour]
+
+					# print(all_vals)
+
+				key = cv.waitKey(1)
+				if key & 0xFF == ord('q'):
+					break
+				# save image 
+				elif key & 0xFF == ord(' '):
+					retval, output_image = cv.imencode('.jpg', transform)
+					img_out = upload_image(output_image)
+					img_url = img_out.cdn_url
+					# update_yaml_link(img_url)
+					# cv.imwrite('test.jpg', frame)
+					# print(output_image)
+					# break
+
+				# pipe.stdout.flush()
+
+	cv.destroyAllWindows()
 
 process_camera_input()

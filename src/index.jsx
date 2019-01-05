@@ -1,7 +1,6 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import P5Wrapper from 'react-p5-wrapper';
-import { startOfWeek } from 'date-fns';
 
 /**
  * The main React container for the app. It holds the state and passes it down

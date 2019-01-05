@@ -21,7 +21,8 @@
     "webpack-dev-server": "^3.1.1"
   },
   "scripts": {
-    "start": "webpack-dev-server --inline --hot --mode development"
+    "start": "webpack-dev-server --inline --hot --mode development",
+    "server": "babel-node --presets env server/index.js"
   },
   "dependencies": {
     "babel-cli": "^6.26.0",
